@@ -19,6 +19,8 @@
 
 </div>
 
+<br>
+
 ## What does it do?
 
 A companion to *[Toontown Rewritten](https://www.toontownrewritten.com)*, **MultiTooner** allows you to store login information for an unlimited amount of accounts and start playing them from the menu bar.
@@ -27,10 +29,12 @@ You are also able to add or remove stored accounts from the menu bar alone.
 
 ## Requirements
 
-Firstly, this application **only works on MacOS**, and it uses the following packages:
+**MultiTooner** uses the following packages:
 - **[rumps]()** to actually build the menu bar app
 - **[pyobjc-framework-LaunchServices]()** to help with login on startup functionality
 - **[tooner](http://github.com/jakebrehm/tooner)**, my own package, to launch a Toontown Rewritten session
+
+However, note that this application **only supports MacOS**.
 
 ## How can I get this set up?
 
@@ -40,7 +44,7 @@ Very soon, I'll release a frozen build of the project, but for now, clone this r
 git clone https://github.com/jakebrehm/multitooner.git
 ```
 
-and then navigate to the directory in a terminal. Make sure you are in the outer **multitooner** folder, and not the nested folder with the same name, and then you can build the application using [py2app](https://github.com/ronaldoussoren/py2app). Run the command
+and then navigate to the cloned directory in a terminal. Make sure you are in the outer **multitooner** folder, and not the nested folder with the same name, and then you can build the application using [py2app](https://github.com/ronaldoussoren/py2app). Run the command
 
 ```
 python script/setup.py py2app
