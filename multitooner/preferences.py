@@ -25,28 +25,4 @@ class RemoveAccount(rumps.Window):
         self.message = 'Enter the exact name of the account you wish to remove.'
         self.default_text = 'name'
         self.icon = None
-
-
-if __name__ == '__main__':
-
-    # window = AddAccount()
-    # while True:
-    #     response = window.run()
-    #     if response.clicked:
-    #         text = [t for t in response.text.split('\n') if t]
-    #         if len(text) == 3:
-    #             break
-    #         else:
-    #             window = AddAccount()
-    #             window.message = (
-    #                 'Please try again.\n\n'
-    #                 'Replace the placeholder text with your login information.'
-    #             )
-    #             continue
-    #     else:
-    #         break
-
-    # print(text)
-
-    RemoveAccount().run()
     

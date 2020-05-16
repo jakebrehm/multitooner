@@ -5,6 +5,7 @@ import pathlib
 import rumps
 import tooner
 
+import login
 import preferences
 
 
@@ -13,8 +14,7 @@ class Application(rumps.App):
     def __init__(self, *args, **kwargs):
         # Initialize the application and set the icon
         super().__init__(*args, **kwargs)
-        # self._set_icon('icon.ico')
-        self._set_icon('appicon.icns')
+        self._set_icon('icon.icns')
 
         # Get the application support directory of the toontown engine
         self._toontown = rumps.application_support("Toontown Rewritten")
@@ -46,14 +46,38 @@ class Application(rumps.App):
             'Remove Account',
             callback=self._remove_account,
         ))
-        # preferences.add(rumps.MenuItem(
-        #     'Run at Startup',
-        # ))
+        preferences.add(None)
+        self._login_option = rumps.MenuItem(
+            'Run at Login',
+            callback=self._login,
+        )
+        preferences.add(self._login_option)
         self.menu.add(preferences)
         self.menu.add(None)
 
+    def _login(self, sender):
+        original_state = self._login_option.state
+        self._update_login_option()
+        if sender.state == -1:
+            return
+        if original_state != sender.state:
+            return
+        sender.state = int(not sender.state)
+        if sender.state:
+            login.enable_run_at_login()
+        else:
+            login.disable_run_at_login()
+
+    def _update_login_option(self):
+        run_at_login = self._login_option
+        if run_at_login.state == -1:
+            return
+        run_at_login.state = int(login.is_run_at_login_enabled())
+        if run_at_login.state == -1:
+            run_at_login.set_callback(None)
+
     def _launch(self, section):
-        def wrapped(event=None):
+        def wrapped(sender=None):
             # Read the login information for the first toon
             username = self.config[section]['username']
             password = self.config[section]['password']
@@ -62,11 +86,11 @@ class Application(rumps.App):
             launcher.play(username=username, password=password)
         return wrapped
 
-    def _launch_all(self, event):
+    def _launch_all(self, sender):
         for account in self._accounts:
             self._launch(account)()
 
-    def _add_account(self, event):
+    def _add_account(self, sender):
         window = preferences.AddAccount()
         while True:
             response = window.run()
@@ -93,7 +117,7 @@ class Application(rumps.App):
 
         self._save_config()
 
-    def _remove_account(self, event):
+    def _remove_account(self, sender):
         window = preferences.RemoveAccount()
         while True:
             response = window.run()

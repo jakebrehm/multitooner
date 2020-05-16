@@ -21,14 +21,12 @@ DATA_FOLDER = os.path.join(MAIN_DIRECTORY, 'assets')
 # Read the configuration file
 APPLICATION_PATH = os.path.join(PROJECT_FOLDER, 'app.py')
 PREFERENCES_PATH = os.path.join(PROJECT_FOLDER, 'preferences.py')
-MENUBAR_ICON_PATH = os.path.join(DATA_FOLDER, 'icon.ico')
-APP_ICON_PATH = os.path.join(DATA_FOLDER, 'appicon.icns')
+ICON_PATH = os.path.join(DATA_FOLDER, 'icon.icns')
 
 APP = [APPLICATION_PATH]
 DATA_FILES = [
     PREFERENCES_PATH,
-    MENUBAR_ICON_PATH,
-    APP_ICON_PATH,
+    ICON_PATH,
 ]
 OPTIONS = {
     'argv_emulation': True,
@@ -36,7 +34,7 @@ OPTIONS = {
         'LSUIElement': True,
     },
     'packages': ['rumps', 'requests', 'tooner'],
-    'iconfile': APP_ICON_PATH,
+    'iconfile': ICON_PATH,
 }
 
 setup(
