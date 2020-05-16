@@ -3,8 +3,8 @@ import rumps
 
 class AddAccount(rumps.Window):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(ok='Add', cancel='Cancel', dimensions=(290, 55))
+    def __init__(self):
+        super().__init__(ok='Add', cancel='Cancel', dimensions=(295, 55))
         self.title = 'Add Account'
         self.message = (
             'Please enter your login information.\n\n'
@@ -17,23 +17,36 @@ class AddAccount(rumps.Window):
         self.icon = None
 
 
+class RemoveAccount(rumps.Window):
+
+    def __init__(self):
+        super().__init__(ok='Remove', cancel='Cancel', dimensions=(295, 24))
+        self.title = 'Remove Account'
+        self.message = 'Enter the exact name of the account you wish to remove.'
+        self.default_text = 'name'
+        self.icon = None
+
+
 if __name__ == '__main__':
 
-    window = AddAccount()
-    while True:
-        response = window.run()
-        if response.clicked:
-            text = [t for t in response.text.split('\n') if t]
-            if len(text) == 3:
-                break
-            else:
-                window = AddAccount()
-                window.message = (
-                    'Please try again.\n\n'
-                    'Replace the placeholder text with your login information.'
-                )
-                continue
-        else:
-            break
+    # window = AddAccount()
+    # while True:
+    #     response = window.run()
+    #     if response.clicked:
+    #         text = [t for t in response.text.split('\n') if t]
+    #         if len(text) == 3:
+    #             break
+    #         else:
+    #             window = AddAccount()
+    #             window.message = (
+    #                 'Please try again.\n\n'
+    #                 'Replace the placeholder text with your login information.'
+    #             )
+    #             continue
+    #     else:
+    #         break
+
+    # print(text)
+
+    RemoveAccount().run()
     
-    print(text)

@@ -23,13 +23,17 @@ class Application(rumps.App):
         self.config = configparser.ConfigParser()
         self.config.read(self['config.ini'])
 
+        # Initialize the menu
+        self._initialize_menu()
+
+    def _initialize_menu(self):
         # Add a "Launch All" item
-        launch_all = rumps.MenuItem('Launch All')
+        launch_all = rumps.MenuItem('Launch All', callback=self._launch_all)
         self.menu.add(launch_all)
         self.menu.add(None)
         # Create a menu item for each account in the config file
-        for section in self.config.sections():
-            item = rumps.MenuItem(section, callback=self._launch(section))
+        for account in self._accounts:
+            item = rumps.MenuItem(account, callback=self._launch(account))
             self.menu.add(item)
         self.menu.add(None)
         # Make a nested preferences menu
@@ -38,24 +42,29 @@ class Application(rumps.App):
             'Add Account',
             callback=self._add_account,
         ))
-        preferences.add(rumps.MenuItem('Remove Account'))
-        preferences.add(rumps.MenuItem('Run at Startup'))
+        preferences.add(rumps.MenuItem(
+            'Remove Account',
+            callback=self._remove_account,
+        ))
+        # preferences.add(rumps.MenuItem(
+        #     'Run at Startup',
+        # ))
         self.menu.add(preferences)
         self.menu.add(None)
 
-        for item in self.menu.items():
-            print(item)
-
     def _launch(self, section):
-        toontown_launcher = tooner.ToontownLauncher
-        def wrapped(*args, **kwargs):
+        def wrapped(event=None):
             # Read the login information for the first toon
             username = self.config[section]['username']
             password = self.config[section]['password']
             # Launch the game
-            launcher = toontown_launcher(self._toontown)
+            launcher = tooner.ToontownLauncher(self._toontown)
             launcher.play(username=username, password=password)
         return wrapped
+
+    def _launch_all(self, event):
+        for account in self._accounts:
+            self._launch(account)()
 
     def _add_account(self, event):
         window = preferences.AddAccount()
@@ -74,7 +83,7 @@ class Application(rumps.App):
                     continue
             else:
                 return
-        
+
         self.config.add_section(text[0])
         self.config.set(text[0], 'username', text[1])
         self.config.set(text[0], 'password', text[2])
@@ -84,10 +93,30 @@ class Application(rumps.App):
 
         self._save_config()
 
+    def _remove_account(self, event):
+        window = preferences.RemoveAccount()
+        while True:
+            response = window.run()
+            if response.clicked:
+                text = [t for t in response.text.split('\n') if t]
+                if len(text) == 1 and text[0] in self._accounts:
+                    break
+                else:
+                    window = preferences.RemoveAccount()
+                    window.message = ('Please try again.\n\n' + window.message)
+                    continue
+            else:
+                return
+        
+        self.config.remove_section(text[0])
+
+        self.menu.pop(text[0])
+
+        self._save_config()
+
     def _save_config(self):
         with open(self['config.ini'], 'w') as config:
             self.config.write(config)
-        # self.config.write()
 
     def _set_icon(self, item):
         try:
@@ -99,6 +128,10 @@ class Application(rumps.App):
 
     def __getitem__(self, item):
         return os.path.join(rumps.application_support("MultiTooner"), item)
+
+    @property
+    def _accounts(self):
+        return self.config.sections()
 
 
 if __name__ == '__main__':
