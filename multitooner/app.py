@@ -14,7 +14,7 @@ class Application(rumps.App):
     def __init__(self, *args, **kwargs):
         # Initialize the application and set the icon
         super().__init__(*args, **kwargs)
-        self._set_icon('icon.icns')
+        self._set_icon('icon-desaturated.icns')
 
         # Get the application support directory of the toontown engine
         self._toontown = rumps.application_support("Toontown Rewritten")
@@ -25,6 +25,9 @@ class Application(rumps.App):
 
         # Initialize the menu
         self._initialize_menu()
+
+        # Update the Run at Login option
+        self._update_login_option()
 
     def _initialize_menu(self):
         # Add a "Launch All" item

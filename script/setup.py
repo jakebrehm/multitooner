@@ -22,9 +22,11 @@ DATA_FOLDER = os.path.join(MAIN_DIRECTORY, 'assets')
 APPLICATION_PATH = os.path.join(PROJECT_FOLDER, 'app.py')
 PREFERENCES_PATH = os.path.join(PROJECT_FOLDER, 'preferences.py')
 ICON_PATH = os.path.join(DATA_FOLDER, 'icon.icns')
+MENUBAR_ICON_PATH = os.path.join(DATA_FOLDER, 'icon-desaturated.icns')
 
 APP = [APPLICATION_PATH]
 DATA_FILES = [
+    MENUBAR_ICON_PATH,
     PREFERENCES_PATH,
     ICON_PATH,
 ]
