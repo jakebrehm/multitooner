@@ -10,8 +10,16 @@ import login
 import preferences
 
 
+def update_menu(function):
+    def wrapper(self, *args, **kwargs):
+        function(self, *args, **kwargs)
+        self._update_menu_items()
+    return wrapper
+
+
 class Application(rumps.App):
 
+    @update_menu
     def __init__(self, *args, **kwargs):
         # Initialize the application and set the icon
         super().__init__(*args, **kwargs)
@@ -24,11 +32,6 @@ class Application(rumps.App):
         self.config = config.Configuration(self, 'config.ini')
         self._initialize_menu()
 
-        # Update certain menu items
-        self._update_login_option()
-        self._update_launch_all()
-
-
     def _initialize_menu(self):
         # Add a "Launch All" item
         self._launch_all_item = rumps.MenuItem(
@@ -37,7 +40,7 @@ class Application(rumps.App):
         )
         self.menu.add(self._launch_all_item)
         self.menu.add(None)
-        
+
         # Create a menu item for each account in the config file
         for account in self._accounts:
             item = rumps.MenuItem(account, callback=self._launch(account))
@@ -50,10 +53,11 @@ class Application(rumps.App):
             'Add Account',
             callback=self._add_account,
         ))
-        preferences.add(rumps.MenuItem(
+        self._remove_account_item = rumps.MenuItem(
             'Remove Account',
             callback=self._remove_account,
-        ))
+        )
+        preferences.add(self._remove_account_item)
         preferences.add(None)
         self._login_option = rumps.MenuItem(
             'Run at Login',
@@ -63,11 +67,19 @@ class Application(rumps.App):
         self.menu.add(preferences)
         self.menu.add(None)
 
-    def _update_launch_all(self):
-        if not len(self._accounts):
-            self._launch_all_item.set_callback(None)
-        else:
-            self._launch_all_item.set_callback(self._launch_all)
+    def _update_menu_items(self):
+        self._update_login_option()
+        self._disable_if_no_accounts(
+            self._launch_all_item,
+            self._launch_all,
+        )
+        self._disable_if_no_accounts(
+            self._remove_account_item,
+            self._remove_account,
+        )
+
+    def _disable_if_no_accounts(self, item, callback):
+        item.set_callback(callback if len(self._accounts) else None)
 
     def _login(self, sender):
         original_state = self._login_option.state
@@ -103,6 +115,7 @@ class Application(rumps.App):
         for account in self._accounts:
             self._launch(account)()
 
+    @update_menu
     def _add_account(self, sender):
         window = preferences.AddAccount()
         while True:
@@ -126,8 +139,7 @@ class Application(rumps.App):
         item = rumps.MenuItem(text[0], callback=self._launch(text[0]))
         self.menu.insert_before('SeparatorMenuItem_2', item)
 
-        self._update_launch_all()
-
+    @update_menu
     def _remove_account(self, sender):
         window = preferences.RemoveAccount()
         while True:
@@ -146,8 +158,6 @@ class Application(rumps.App):
         self.config.remove_account(*text)
 
         self.menu.pop(text[0])
-
-        self._update_launch_all()
 
     def _save_config(self):
         with open(self['config.ini'], 'w') as config:
