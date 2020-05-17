@@ -21,12 +21,16 @@ DATA_FOLDER = os.path.join(MAIN_DIRECTORY, 'assets')
 # Read the configuration file
 APPLICATION_PATH = os.path.join(PROJECT_FOLDER, 'app.py')
 PREFERENCES_PATH = os.path.join(PROJECT_FOLDER, 'preferences.py')
+CONFIG_PATH = os.path.join(PROJECT_FOLDER, 'config.py')
+LOGIN_PATH = os.path.join(PROJECT_FOLDER, 'login.py')
 ICON_PATH = os.path.join(DATA_FOLDER, 'icon.icns')
 MENUBAR_ICON_PATH = os.path.join(DATA_FOLDER, 'icon-desaturated.icns')
 
 APP = [APPLICATION_PATH]
 DATA_FILES = [
     MENUBAR_ICON_PATH,
+    CONFIG_PATH,
+    LOGIN_PATH,
     PREFERENCES_PATH,
     ICON_PATH,
 ]

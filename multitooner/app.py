@@ -5,6 +5,7 @@ import pathlib
 import rumps
 import tooner
 
+import config
 import login
 import preferences
 
@@ -19,26 +20,30 @@ class Application(rumps.App):
         # Get the application support directory of the toontown engine
         self._toontown = rumps.application_support("Toontown Rewritten")
 
-        # Read the configuration file
-        self.config = configparser.ConfigParser()
-        self.config.read(self['config.ini'])
-
-        # Initialize the menu
+        # Initialize the configuration file and menu
+        self.config = config.Configuration(self, 'config.ini')
         self._initialize_menu()
 
-        # Update the Run at Login option
+        # Update certain menu items
         self._update_login_option()
+        self._update_launch_all()
+
 
     def _initialize_menu(self):
         # Add a "Launch All" item
-        launch_all = rumps.MenuItem('Launch All', callback=self._launch_all)
-        self.menu.add(launch_all)
+        self._launch_all_item = rumps.MenuItem(
+            'Launch All',
+            callback=self._launch_all,
+        )
+        self.menu.add(self._launch_all_item)
         self.menu.add(None)
+        
         # Create a menu item for each account in the config file
         for account in self._accounts:
             item = rumps.MenuItem(account, callback=self._launch(account))
             self.menu.add(item)
         self.menu.add(None)
+
         # Make a nested preferences menu
         preferences = rumps.MenuItem('Preferences')
         preferences.add(rumps.MenuItem(
@@ -57,6 +62,12 @@ class Application(rumps.App):
         preferences.add(self._login_option)
         self.menu.add(preferences)
         self.menu.add(None)
+
+    def _update_launch_all(self):
+        if not len(self._accounts):
+            self._launch_all_item.set_callback(None)
+        else:
+            self._launch_all_item.set_callback(self._launch_all)
 
     def _login(self, sender):
         original_state = self._login_option.state
@@ -82,8 +93,7 @@ class Application(rumps.App):
     def _launch(self, section):
         def wrapped(sender=None):
             # Read the login information for the first toon
-            username = self.config[section]['username']
-            password = self.config[section]['password']
+            username, password = self.config.get_account(section)
             # Launch the game
             launcher = tooner.ToontownLauncher(self._toontown)
             launcher.play(username=username, password=password)
@@ -111,14 +121,12 @@ class Application(rumps.App):
             else:
                 return
 
-        self.config.add_section(text[0])
-        self.config.set(text[0], 'username', text[1])
-        self.config.set(text[0], 'password', text[2])
+        self.config.add_account(*text)
 
         item = rumps.MenuItem(text[0], callback=self._launch(text[0]))
         self.menu.insert_before('SeparatorMenuItem_2', item)
 
-        self._save_config()
+        self._update_launch_all()
 
     def _remove_account(self, sender):
         window = preferences.RemoveAccount()
@@ -135,11 +143,11 @@ class Application(rumps.App):
             else:
                 return
         
-        self.config.remove_section(text[0])
+        self.config.remove_account(*text)
 
         self.menu.pop(text[0])
 
-        self._save_config()
+        self._update_launch_all()
 
     def _save_config(self):
         with open(self['config.ini'], 'w') as config:
@@ -158,7 +166,7 @@ class Application(rumps.App):
 
     @property
     def _accounts(self):
-        return self.config.sections()
+        return self.config.accounts
 
 
 if __name__ == '__main__':
