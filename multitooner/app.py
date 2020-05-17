@@ -42,7 +42,7 @@ class Application(rumps.App):
         self.menu.add(None)
 
         # Create a menu item for each account in the config file
-        for account in self._accounts:
+        for account in self.accounts:
             item = rumps.MenuItem(account, callback=self._launch(account))
             self.menu.add(item)
         self.menu.add(None)
@@ -79,7 +79,15 @@ class Application(rumps.App):
         )
 
     def _disable_if_no_accounts(self, item, callback):
-        item.set_callback(callback if len(self._accounts) else None)
+        item.set_callback(callback if len(self.accounts) else None)
+
+    def _update_login_option(self):
+        run_at_login = self._login_option
+        if run_at_login.state == -1:
+            return
+        run_at_login.state = int(login.is_run_at_login_enabled())
+        if run_at_login.state == -1:
+            run_at_login.set_callback(None)
 
     def _login(self, sender):
         original_state = self._login_option.state
@@ -94,14 +102,6 @@ class Application(rumps.App):
         else:
             login.disable_run_at_login()
 
-    def _update_login_option(self):
-        run_at_login = self._login_option
-        if run_at_login.state == -1:
-            return
-        run_at_login.state = int(login.is_run_at_login_enabled())
-        if run_at_login.state == -1:
-            run_at_login.set_callback(None)
-
     def _launch(self, section):
         def wrapped(sender=None):
             # Read the login information for the first toon
@@ -112,56 +112,28 @@ class Application(rumps.App):
         return wrapped
 
     def _launch_all(self, sender):
-        for account in self._accounts:
+        for account in self.accounts:
             self._launch(account)()
 
     @update_menu
     def _add_account(self, sender):
-        window = preferences.AddAccount()
-        while True:
-            response = window.run()
-            if response.clicked:
-                text = [t for t in response.text.split('\n') if t]
-                if len(text) == 3:
-                    break
-                else:
-                    window = preferences.AddAccount()
-                    window.message = (
-                        'Please try again.\n\n'
-                        'Replace the placeholders with your login information.'
-                    )
-                    continue
-            else:
-                return
-
-        self.config.add_account(*text)
-
-        item = rumps.MenuItem(text[0], callback=self._launch(text[0]))
-        self.menu.insert_before('SeparatorMenuItem_2', item)
+        window = preferences.AddAccount(self)
+        response = window.get_input()
+        if response:
+            self.config.add_account(*response)
+            item = rumps.MenuItem(
+                response[0],
+                callback=self._launch(response[0]),
+            )
+            self.menu.insert_before('SeparatorMenuItem_2', item)
 
     @update_menu
     def _remove_account(self, sender):
-        window = preferences.RemoveAccount()
-        while True:
-            response = window.run()
-            if response.clicked:
-                text = [t for t in response.text.split('\n') if t]
-                if len(text) == 1 and text[0] in self._accounts:
-                    break
-                else:
-                    window = preferences.RemoveAccount()
-                    window.message = ('Please try again.\n\n' + window.message)
-                    continue
-            else:
-                return
-        
-        self.config.remove_account(*text)
-
-        self.menu.pop(text[0])
-
-    def _save_config(self):
-        with open(self['config.ini'], 'w') as config:
-            self.config.write(config)
+        window = preferences.RemoveAccount(self)
+        response = window.get_input()
+        if response:
+            self.config.remove_account(*response)
+            self.menu.pop(response[0])
 
     def _set_icon(self, item):
         try:
@@ -175,7 +147,7 @@ class Application(rumps.App):
         return os.path.join(rumps.application_support("MultiTooner"), item)
 
     @property
-    def _accounts(self):
+    def accounts(self):
         return self.config.accounts
 
 
