@@ -40,7 +40,7 @@ class RemoveAccount(rumps.Window):
     def __init__(self, application):
 
         self._application = application
-        self._base_message = 'Enter the exact name of the account to remove.'
+        self._base_message = 'Enter the exact name of the account.'
 
         super().__init__(ok='Remove', cancel='Cancel', dimensions=(295, 24))
         self.title = 'Remove Account'

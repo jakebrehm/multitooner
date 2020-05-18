@@ -196,6 +196,26 @@ class Application(rumps.App):
 
     @update_menu
     def remove_account(self, sender):
+        '''Removes an account.
+
+        Launches a window where the user can specify which currently 
+        configured account to remove. If the user's input is valid, 
+        the account is removed from both the menu and the configuration 
+        file.
+
+        Args:
+            sender (rumps.MenuItem):
+                Automatically sent when a menu item is invoked, and 
+                is essentially a reference to the invoked menu item.
+        '''
+
+        # Launch the Remove Account window and get the user's input
+        window = preferences.RemoveAccount(self)
+        response = window.get_input()
+        # If the input is valid, remove the account
+        if response:
+            self.config.remove_account(*response)
+            self.menu.pop(response[0])
 
     def launch(self, name):
         '''Launches the specified account.
@@ -226,26 +246,6 @@ class Application(rumps.App):
                 Automatically sent when a menu item is invoked, and 
                 is essentially a reference to the invoked menu item.
         '''
-        '''Removes an account.
-
-        Launches a window where the user can specify which currently 
-        configured account to remove. If the user's input is valid, 
-        the account is removed from both the menu and the configuration 
-        file.
-
-        Args:
-            sender (rumps.MenuItem):
-                Automatically sent when a menu item is invoked, and 
-                is essentially a reference to the invoked menu item.
-        '''
-
-        # Launch the Remove Account window and get the user's input
-        window = preferences.RemoveAccount(self)
-        response = window.get_input()
-        # If the input is valid, remove the account
-        if response:
-            self.config.remove_account(*response)
-            self.menu.pop(response[0])
 
         for account in self.accounts:
             self.launch(account)()
