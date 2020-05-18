@@ -1,49 +1,28 @@
+# -*- coding: utf-8 -*-
 
-"""
-Module to modify MacOS login items. The bulk of the script was taken from:
+'''
+multitooner.login module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The login module for the MultiTooner application. Contains 
+functions for the modifying the user's login items.
+
+The bulk of the script was taken from:
 https://github.com/pudquick/pyLoginItems/blob/master/pyLoginItems.py
-"""
+However, one modification had to be made to actually get it to work, 
+and the remaining modifications were made to make its style more in 
+line with the rest of the MultiTooner project.
 
-from Foundation import NSBundle
-
-APP_DIRECTORY = NSBundle.mainBundle().bundlePath()
-
-def run_at_login_is_enabled():
-    return APP_DIRECTORY in list_login_items()
-
-def enable_run_at_login():
-    add_login_item(APP_DIRECTORY)
-
-def disable_run_at_login():
-    remove_login_item(APP_DIRECTORY)
-
-# /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Headers/LSSharedFileList.h
-
-# /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Headers/LSSharedFileList.h
-
-# Fun things:
-# kLSSharedFileListFavoriteItems
-# kLSSharedFileListFavoriteVolumes
-# kLSSharedFileListRecentApplicationItems
-# kLSSharedFileListRecentDocumentItems
-# kLSSharedFileListRecentServerItems
-# kLSSharedFileListSessionLoginItems
-# kLSSharedFileListGlobalLoginItems - deprecated in 10.9
-
-# Runs in user space, use this with a login script / launchd item / something running as the user
-
-# Example usage:
-#
-# import pyLoginItems
-# >>> pyLoginItems.list_login_items()
-# [u'/Applications/Dropbox.app', u'/Applications/iTunes.app/Contents/MacOS/iTunesHelper.app']
-#
-# pyLoginItems.add_login_item('/Applications/Safari.app', 0)
-# pyLoginItems.remove_login_item('/Applications/TextEdit.app')
+Some extra functions were added as well. The credit for these functions 
+go to the following respository, where a similar module can be found:
+https://github.com/dougn/HalfCaff
+'''
 
 from platform import mac_ver
-from Foundation import NSURL
-from LaunchServices import kLSSharedFileListSessionLoginItems, kLSSharedFileListNoUserInteraction
+
+from Foundation import NSURL, NSBundle
+from LaunchServices import (kLSSharedFileListNoUserInteraction,
+                            kLSSharedFileListSessionLoginItems)
 
 # Need to manually load in 10.11.x+
 os_vers = int(mac_ver()[0].split('.')[1])
@@ -51,16 +30,16 @@ if os_vers > 10:
     from Foundation import NSBundle
     import objc
     SFL_bundle = NSBundle.bundleWithIdentifier_('com.apple.coreservices.SharedFileList')
-    functions  = [('LSSharedFileListCreate',              b'^{OpaqueLSSharedFileListRef=}^{__CFAllocator=}^{__CFString=}@'),
-                  ('LSSharedFileListCopySnapshot',        b'^{__CFArray=}^{OpaqueLSSharedFileListRef=}o^I'),
-                  ('LSSharedFileListItemCopyDisplayName', b'^{__CFString=}^{OpaqueLSSharedFileListItemRef=}'),
-                  ('LSSharedFileListItemResolve',         b'i^{OpaqueLSSharedFileListItemRef=}Io^^{__CFURL=}o^{FSRef=[80C]}'),
-                  ('LSSharedFileListItemMove',            b'i^{OpaqueLSSharedFileListRef=}^{OpaqueLSSharedFileListItemRef=}^{OpaqueLSSharedFileListItemRef=}'),
-                  ('LSSharedFileListItemRemove',          b'i^{OpaqueLSSharedFileListRef=}^{OpaqueLSSharedFileListItemRef=}'),
-                  ('LSSharedFileListInsertItemURL',       b'^{OpaqueLSSharedFileListItemRef=}^{OpaqueLSSharedFileListRef=}^{OpaqueLSSharedFileListItemRef=}^{__CFString=}^{OpaqueIconRef=}^{__CFURL=}^{__CFDictionary=}^{__CFArray=}'),
-                  ('kLSSharedFileListItemBeforeFirst',    b'^{OpaqueLSSharedFileListItemRef=}'),
-                  ('kLSSharedFileListItemLast',           b'^{OpaqueLSSharedFileListItemRef=}'),]
-    import json
+    functions  = [
+        ('LSSharedFileListCreate',              b'^{OpaqueLSSharedFileListRef=}^{__CFAllocator=}^{__CFString=}@'),
+        ('LSSharedFileListCopySnapshot',        b'^{__CFArray=}^{OpaqueLSSharedFileListRef=}o^I'),
+        ('LSSharedFileListItemCopyDisplayName', b'^{__CFString=}^{OpaqueLSSharedFileListItemRef=}'),
+        ('LSSharedFileListItemResolve',         b'i^{OpaqueLSSharedFileListItemRef=}Io^^{__CFURL=}o^{FSRef=[80C]}'),
+        ('LSSharedFileListItemMove',            b'i^{OpaqueLSSharedFileListRef=}^{OpaqueLSSharedFileListItemRef=}^{OpaqueLSSharedFileListItemRef=}'),
+        ('LSSharedFileListItemRemove',          b'i^{OpaqueLSSharedFileListRef=}^{OpaqueLSSharedFileListItemRef=}'),
+        ('LSSharedFileListInsertItemURL',       b'^{OpaqueLSSharedFileListItemRef=}^{OpaqueLSSharedFileListRef=}^{OpaqueLSSharedFileListItemRef=}^{__CFString=}^{OpaqueIconRef=}^{__CFURL=}^{__CFDictionary=}^{__CFArray=}'),
+        ('kLSSharedFileListItemBeforeFirst',    b'^{OpaqueLSSharedFileListItemRef=}'),
+        ('kLSSharedFileListItemLast',           b'^{OpaqueLSSharedFileListItemRef=}'),]
     objc.loadBundleFunctions(SFL_bundle, globals(), functions)
 else:
     from LaunchServices import kLSSharedFileListItemBeforeFirst, kLSSharedFileListItemLast, \
@@ -181,3 +160,16 @@ def add_login_item(path_to_item, position=-1):
                 destination_point = current_items[i]
             # Add ourselves after the file
             result = LSSharedFileListInsertItemURL(list_ref, destination_point, None, None, added_item, {}, [])
+
+# The following functions are custom
+
+APP_DIRECTORY = NSBundle.mainBundle().bundlePath()
+
+def run_at_login_is_enabled():
+    return APP_DIRECTORY in list_login_items()
+
+def enable_run_at_login():
+    add_login_item(APP_DIRECTORY)
+
+def disable_run_at_login():
+    remove_login_item(APP_DIRECTORY)
