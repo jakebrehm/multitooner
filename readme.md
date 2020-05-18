@@ -38,7 +38,7 @@ However, note that this application **only supports MacOS**.
 
 ## How can I get this set up?
 
-Very soon, I'll release a frozen build of the project, but for now, clone this repository via the command
+I'll release a frozen build of the project very soon, but for now, clone this repository via the command
 
 ```
 git clone https://github.com/jakebrehm/multitooner.git
