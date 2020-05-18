@@ -8,7 +8,7 @@ from Foundation import NSBundle
 
 APP_DIRECTORY = NSBundle.mainBundle().bundlePath()
 
-def is_run_at_login_enabled():
+def run_at_login_is_enabled():
     return APP_DIRECTORY in list_login_items()
 
 def enable_run_at_login():
