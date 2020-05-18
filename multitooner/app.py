@@ -4,7 +4,7 @@
 multitooner.app module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The main module for the MultiTooner app. Includes all menu bar
+The main module for the MultiTooner application. Includes all menu bar
 functionality.
 '''
 

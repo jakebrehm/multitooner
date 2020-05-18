@@ -1,10 +1,35 @@
+# -*- coding: utf-8 -*-
+
+'''
+multitooner.preferences module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The preferences module for the MultiTooner application. Contains 
+classes for the application's Preference windows.
+'''
+
 import rumps
 
 
 class AddAccount(rumps.Window):
+    '''A window that allows the user to add an account.
+
+    A very basic wrapper around rumps.Window with preset titles, text, 
+    etc. It includes one supplementary method that handles looping of 
+    the rumps.Window.run() method if incorrect input is received, as 
+    well as parsing of valid input.
+
+    Upon valid input, the parsed input will be returned.
+
+    Args:
+        application (multitooner.app.Application object):
+            A reference to the main Application object.
+    '''
 
     def __init__(self, application):
+        '''Please see help(AddAccount) for more info.'''
 
+        # Store parameters and initalize the base message of the window
         self._application = application
         self._base_message = (
             'Enter your login information.\n\n'
@@ -14,6 +39,7 @@ class AddAccount(rumps.Window):
             'Otherwise, <Option+Return> will add a new line.'
         )
 
+        # Initialize and set up the class
         super().__init__(ok='Add', cancel='Cancel', dimensions=(295, 55))
         self.title = 'Add Account'
         self.message = self._base_message
@@ -21,27 +47,57 @@ class AddAccount(rumps.Window):
         self.icon = None
 
     def get_input(self):
+        '''Run the window until valid input is received.
+        
+        Continuously run the window until the user either cancels or 
+        enters valid input. Validity is determined by parsing the input 
+        and verifying that it matches the expected pattern.
+        '''
+
+        # Loop continuously until cancelled or valid input is received
         while True:
+            # Display the window and wait for the user's response
             response = self.run()
             if response.clicked:
+                # If the user presses "Add", parse the input
                 text = [t for t in response.text.split('\n') if t]
                 if len(text) == 3:
+                    # If the input is valid, break the loop
                     break
                 else:
+                    # Otherwise, edit the message and run the window again
                     self.message = f'Please try again. {self._base_message}'
                     continue
             else:
+                # Exit if the user cancels
                 return
+        # Return the user's valid input
         return text
 
 
 class RemoveAccount(rumps.Window):
+    '''A window that allows the user to remove an account.
+
+    A very basic wrapper around rumps.Window with preset titles, text, 
+    etc. It includes one supplementary method that handles looping of 
+    the rumps.Window.run() method if incorrect input is received, as 
+    well as parsing of valid input.
+
+    Upon valid input, the parsed input will be returned.
+
+    Args:
+        application (multitooner.app.Application object):
+            A reference to the main Application object.
+    '''
 
     def __init__(self, application):
+        '''Please see help(RemoveAccount) for more info.'''
 
+        # Store parameters and initalize the base message of the window
         self._application = application
         self._base_message = 'Enter the exact name of the account.'
 
+        # Initialize and set up the class
         super().__init__(ok='Remove', cancel='Cancel', dimensions=(295, 24))
         self.title = 'Remove Account'
         self.message = self._base_message
@@ -49,15 +105,29 @@ class RemoveAccount(rumps.Window):
         self.icon = None
 
     def get_input(self):
+        '''Run the window until valid input is received.
+        
+        Continuously run the window until the user either cancels or 
+        enters valid input. Validity is determined by parsing the input 
+        and verifying that it matches the expected pattern.
+        '''
+
+        # Loop continuously until cancelled or valid input is received
         while True:
+            # Display the window and wait for the user's response
             response = self.run()
             if response.clicked:
+                # If the user presses "Remove", parse the input
                 text = [t for t in response.text.split('\n') if t]
                 if len(text) == 1 and text[0] in self._application.accounts:
+                    # If the input is valid, break the loop
                     break
                 else:
+                    # Otherwise, edit the message and run the window again
                     self.message = f'Please try again. {self._base_message}'
                     continue
             else:
+                # Exit if the user cancels
                 return
+        # Return the user's valid input
         return text

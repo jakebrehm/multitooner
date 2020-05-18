@@ -4,7 +4,7 @@
 multitooner.config module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The configuration module for the MultiTooner app. Manages the 
+The configuration module for the MultiTooner application. Manages the 
 application's configuration file.
 '''
 
