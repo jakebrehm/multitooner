@@ -44,17 +44,17 @@ class Application(rumps.App):
 
         # Initialize the application and set the icon
         super().__init__(*args, **kwargs)
-        self._set_icon('icon-desaturated.icns')
+        self.icon = self._get_resource('icon-desaturated.icns')
 
         # Get the application support directory of the toontown engine
-        self._toontown = rumps.application_support("Toontown Rewritten")
+        self._toontown = rumps.application_support('Toontown Rewritten')
 
         # Initialize the configuration file and menu
         self.config = config.Configuration(self, 'config.ini')
         self.initialize_menu()
 
         # Initialize the invasion tracker and start if necessary
-        self._interval = 15
+        self._interval = self.config.get_setting('interval')
         self._invasion_timer = rumps.Timer(self._get_invasions, self._interval)
         self._tracker = tooner.InvasionTracker()
         self._invasions = {}
@@ -123,7 +123,7 @@ class Application(rumps.App):
         preferences.add(None)
         self._login_option = rumps.MenuItem(
             'Run at Login',
-            callback=self.run_at_login,
+            callback=self.toggle_run_at_login,
         )
         preferences.add(self._login_option)
         self.menu.add(preferences)
@@ -154,24 +154,37 @@ class Application(rumps.App):
         )
 
     def toggle_invasion_notifications(self, sender):
+        '''Toggles whether or not the application will run at login.
+
+        If the "Invasions Notifications" menu item is currently  
+        unchecked, check it and start the internal invasions timer. 
+        If it is currently checked, uncheck it and stop the internal 
+        invasion timer. Update the configuration file as well. 
+
+        Args:
+            sender (rumps.MenuItem):
+                Automatically sent when a menu item is invoked, and 
+                is essentially a reference to the invoked menu item.
         '''
 
-        '''
-
+        # Note the original state of the "Invasions Notifications" menu item
         original_state = self._track_option.state
-
+        # Make sure that the "Invasions Notifications" menu item is up to date
+        self._update_track_option()
+        # Exit if the "Run at Login" menu item wasn't updated properly
         if sender.state == -1 or original_state != sender.state:
             return
-        
+        # Check the menu item if unchecked and vice versa
         sender.state = int(not sender.state)
+        # Update the value of the invasions setting in the configuration file
         self.config.set_setting('invasions', sender.state)
-
+        # Toggle the invasion timer appropriately
         if sender.state:
             self._invasion_timer.start()
         else:
             self._invasion_timer.stop()
 
-    def run_at_login(self, sender):
+    def toggle_run_at_login(self, sender):
         '''Toggles whether or not the application will run at login.
 
         If the "Run at Login" menu item is currently unchecked, check 
@@ -187,7 +200,7 @@ class Application(rumps.App):
 
         # Note the original state of the "Run at Login" menu item
         original_state = self._login_option.state
-        # Make sure that the "Run at Login" menu item is properly updated
+        # Make sure that the "Run at Login" menu item is up to date
         self._update_login_option()
         # Exit if the "Run at Login" menu item wasn't updated properly
         if sender.state == -1 or original_state != sender.state:
@@ -301,8 +314,14 @@ class Application(rumps.App):
         item.set_callback(callback if len(self.accounts) else None)
 
     def _update_option(self, menu_item, value):
-        '''
+        '''Toggles the specified menu item.
 
+        Args:
+            menu_item (rumps.MenuItem):
+                The menu item to toggle.
+            value (int):
+                Whether to check or uncheck the menu item. Can be 
+                either a 0 to uncheck or a 1 to check.
         '''
 
         if menu_item.state == -1:
@@ -312,8 +331,11 @@ class Application(rumps.App):
             menu_item.set_callback(None)
 
     def _update_track_option(self):
-        '''
+        '''Toggles the "Invasion Notifications" preference.
 
+        Check the configuration file to see if the user has chosen to 
+        receive invasion notifications. If so, check the "Invasion 
+        Notifications" menu item. Otherwise, uncheck the menu item.
         '''
 
         menu_item = self._track_option
@@ -321,7 +343,7 @@ class Application(rumps.App):
         self._update_option(menu_item, value)
 
     def _update_login_option(self):
-        '''Toggles the "Run at Login" preference appropriately.
+        '''Toggles the "Run at Login" preference.
 
         Looks at the user's system preferences to see if the 
         application is currently configured to run at login. If it is, 
@@ -334,37 +356,29 @@ class Application(rumps.App):
         self._update_option(menu_item, value)
 
     def _get_resource(self, filename):
+        '''Determines the path to the specified project asset.
+
+        First attempts to find the file in the same directory as the 
+        application, as that is where assets will be stored in the 
+        frozen app. If it doesn't exist in that location, the method  
+        will attempt to find the file in the project's assets folder.
+
+        Note that these locations are highly specific to this project.
+
+        Args:
+            filename (str):
+                The filename of the asset.
         '''
 
-        '''
-
-        try:
-            # When frozen, the icon will be in the same directory
-            path = os.path.join(pathlib.Path(__file__).parent, filename)
-            # Attempt to open the file so that an error might be triggered
-            with open(path) as _:
-                pass
-        except FileNotFoundError:
+        # When frozen, the icon will be in the same directory
+        path = os.path.join(pathlib.Path(__file__).parent, filename)
+        if not os.path.exists(path):
             # During development, use the icon in the data directory
             PROJECT_DIRECTORY = pathlib.Path(__file__).resolve().parent.parent
             ASSETS_FOLDER = os.path.join(PROJECT_DIRECTORY, 'assets')
             path = os.path.join(ASSETS_FOLDER, filename)
+        # Return the filepath
         return path
-
-    def _set_icon(self, filename):
-        '''Sets the icon of the application.
-
-        Sets the application's icon, which will appear in the menu 
-        bar, to the specified icon file.
-        
-        Args:
-            filename (str):
-                The name of the icon file. The icon should either be a 
-                .ico (Windows icon) file or a .icns (Mac icon, 
-                recommended) file.
-        '''
-        
-        self.icon = self._get_resource(filename)
 
     def _get_invasions(self, sender):
         '''Notifies the user of new invasions.
@@ -379,15 +393,14 @@ class Application(rumps.App):
                 Automatically sent when a menu item is invoked.
         '''
 
-        #
+        # Get the previous iteration's and the current invasion information
         previous = self._invasions
         current = self._tracker.get_invasions()
 
-        #
+        # Determine what invasions changed since the last check
         difference = set(current.items()) - set(previous.items())
-        #
+        # Send a notification for each different invasion
         for invasion in difference:
-            #
             district, cog = invasion
             rumps.notification(
                 title='A cog invasion has begun!',
@@ -395,6 +408,7 @@ class Application(rumps.App):
                 message=f'{cog}s have invaded {district}!',
             )
         
+        # Store the current invasions for the next iteration
         self._invasions = current
 
 
