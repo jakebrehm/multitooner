@@ -53,7 +53,7 @@ class Application(rumps.App):
         self.config = config.Configuration(self, 'config.ini')
         self.initialize_menu()
 
-        # Initialize the invasion tracker
+        # Initialize the invasion tracker and start if necessary
         self._interval = 15
         self._invasion_timer = rumps.Timer(self._get_invasions, self._interval)
         self._tracker = tooner.InvasionTracker()
@@ -117,7 +117,7 @@ class Application(rumps.App):
         preferences.add(None)
         self._track_option = rumps.MenuItem(
             'Invasion Notifications',
-            callback=self._toggle_invasion_notifications,
+            callback=self.toggle_invasion_notifications,
         )
         preferences.add(self._track_option)
         preferences.add(None)
@@ -152,6 +152,24 @@ class Application(rumps.App):
             self._remove_account_option,
             self.remove_account,
         )
+
+    def toggle_invasion_notifications(self, sender):
+        '''
+
+        '''
+
+        original_state = self._track_option.state
+
+        if sender.state == -1 or original_state != sender.state:
+            return
+        
+        sender.state = int(not sender.state)
+        self.config.set_setting('invasions', sender.state)
+
+        if sender.state:
+            self._invasion_timer.start()
+        else:
+            self._invasion_timer.stop()
 
     def run_at_login(self, sender):
         '''Toggles whether or not the application will run at login.
@@ -283,6 +301,10 @@ class Application(rumps.App):
         item.set_callback(callback if len(self.accounts) else None)
 
     def _update_option(self, menu_item, value):
+        '''
+
+        '''
+
         if menu_item.state == -1:
             return
         menu_item.state = int(value)
@@ -311,6 +333,24 @@ class Application(rumps.App):
         value = login.run_at_login_is_enabled()
         self._update_option(menu_item, value)
 
+    def _get_resource(self, filename):
+        '''
+
+        '''
+
+        try:
+            # When frozen, the icon will be in the same directory
+            path = os.path.join(pathlib.Path(__file__).parent, filename)
+            # Attempt to open the file so that an error might be triggered
+            with open(path) as _:
+                pass
+        except FileNotFoundError:
+            # During development, use the icon in the data directory
+            PROJECT_DIRECTORY = pathlib.Path(__file__).resolve().parent.parent
+            ASSETS_FOLDER = os.path.join(PROJECT_DIRECTORY, 'assets')
+            path = os.path.join(ASSETS_FOLDER, filename)
+        return path
+
     def _set_icon(self, filename):
         '''Sets the icon of the application.
 
@@ -323,15 +363,8 @@ class Application(rumps.App):
                 .ico (Windows icon) file or a .icns (Mac icon, 
                 recommended) file.
         '''
-
-        try:
-            # When frozen, the icon will be in the same directory
-            self.icon = os.path.join(pathlib.Path(__file__).parent, filename)
-        except FileNotFoundError:
-            # During development, use the icon in the data directory
-            PROJECT_DIRECTORY = pathlib.Path(__file__).resolve().parent.parent
-            DATA_FOLDER = os.path.join(PROJECT_DIRECTORY, 'assets')
-            self.icon = os.path.join(DATA_FOLDER, filename)
+        
+        self.icon = self._get_resource(filename)
 
     def _get_invasions(self, sender):
         '''Notifies the user of new invasions.
@@ -360,24 +393,9 @@ class Application(rumps.App):
                 title='A cog invasion has begun!',
                 subtitle=None,
                 message=f'{cog}s have invaded {district}!',
-                # icon='',
             )
         
         self._invasions = current
-
-    def _toggle_invasion_notifications(self, sender):
-        original_state = self._track_option.state
-
-        if sender.state == -1 or original_state != sender.state:
-            return
-        
-        sender.state = int(not sender.state)
-        self.config.set_setting('invasions', sender.state)
-
-        if sender.state:
-            self._invasion_timer.start()
-        else:
-            self._invasion_timer.stop()
 
 
 if __name__ == '__main__':
