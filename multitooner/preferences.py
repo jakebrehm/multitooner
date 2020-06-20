@@ -78,8 +78,11 @@ class AddAccount(rumps.Window):
         # Return the user's valid input
         return text
     
-    def is_valid(self, response):
-        conditions = [len(text) == 3]
+    def is_valid(self, text):
+        conditions = [
+            len(text) == 3,
+            text[0] not in self._application.accounts
+        ]
         return all(conditions)
 
 
@@ -145,5 +148,8 @@ class RemoveAccount(rumps.Window):
         return text
     
     def is_valid(self, text):
-        conditions = [len(text) == 1, text[0] in self._application.accounts]
+        conditions = [
+            len(text) == 1,
+            text[0] in self._application.accounts,
+        ]
         return all(conditions)

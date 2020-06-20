@@ -39,7 +39,6 @@ class Application(rumps.App):
             Returns a list of account names.
     '''
 
-    # @update_menu
     def __init__(self, *args, **kwargs):
         '''Please see help(Applicatioon) for more info.'''
 
@@ -283,17 +282,21 @@ class Application(rumps.App):
         
         item.set_callback(callback if len(self.accounts) else None)
 
+    def _update_option(self, menu_item, value):
+        if menu_item.state == -1:
+            return
+        menu_item.state = int(value)
+        if menu_item.state == -1:
+            menu_item.set_callback(None)
+
     def _update_track_option(self):
         '''
 
         '''
 
-        track_invasions = self._track_option
-        if track_invasions.state == -1:
-            return
-        track_invasions.state = int(self.config.get_setting('invasions'))
-        if track_invasions.state == -1:
-            track_invasions.set_callback(None)
+        menu_item = self._track_option
+        value = self.config.get_setting('invasions')
+        self._update_option(menu_item, value)
 
     def _update_login_option(self):
         '''Toggles the "Run at Login" preference appropriately.
@@ -304,12 +307,9 @@ class Application(rumps.App):
         uncheck it.
         '''
 
-        run_at_login = self._login_option
-        if run_at_login.state == -1:
-            return
-        run_at_login.state = int(login.run_at_login_is_enabled())
-        if run_at_login.state == -1:
-            run_at_login.set_callback(None)
+        menu_item = self._login_option
+        value = login.run_at_login_is_enabled()
+        self._update_option(menu_item, value)
 
     def _set_icon(self, filename):
         '''Sets the icon of the application.

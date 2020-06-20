@@ -65,7 +65,7 @@ class Configuration(configparser.ConfigParser):
 
         # Make a dictionary of default options and values
         self._default_settings = {
-            'invasions': {'value': 1, 'type': int},
+            'invasions': {'value': 0, 'type': int},
             'interval': {'value': 60, 'type': int},
         }
         # Overwrite the option or create it if it doesn't already exist
