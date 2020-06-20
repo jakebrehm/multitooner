@@ -54,6 +54,42 @@ class Configuration(configparser.ConfigParser):
         self._config_path = self._application[self._filename]
         # Read the configuration file whether it exists or not
         self.read(self._config_path)
+        # Set default options
+        self._set_default_values(overwrite=False)
+
+    @save_config
+    def _set_default_values(self, section='DEFAULT', overwrite=False):
+        '''
+
+        '''
+
+        # Make a dictionary of default options and values
+        self._default_settings = {
+            'invasions': {'value': 1, 'type': int},
+            'interval': {'value': 60, 'type': int},
+        }
+        # Overwrite the option or create it if it doesn't already exist
+        for option, value in self._default_settings.items():
+            if overwrite or not self.has_option(section, option):
+                self.set(section, option, str(value['value']))
+
+    def get_setting(self, option, section='DEFAULT'):
+        '''
+
+        '''
+
+        # Get the value of the specified option and cast it appropriately
+        value = self.get(section, option)
+        return self._default_settings[option]['type'](value)
+
+    @save_config
+    def set_setting(self, option, value, section='DEFAULT'):
+        '''
+
+        '''
+
+        # Set the value of the specified option
+        self.set(section, option, str(value))
 
     def get_account(self, account):
         '''Get information about the specified account.

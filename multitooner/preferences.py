@@ -61,7 +61,11 @@ class AddAccount(rumps.Window):
             if response.clicked:
                 # If the user presses "Add", parse the input
                 text = [t for t in response.text.split('\n') if t]
-                if len(text) == 3:
+                if text[0] == 'DEFAULT':
+                    # The name of the account must not be DEFAULT
+                    self.message = f'Invalid account name. Please try again.'
+                    continue
+                elif self.is_valid(text):
                     # If the input is valid, break the loop
                     break
                 else:
@@ -73,6 +77,10 @@ class AddAccount(rumps.Window):
                 return
         # Return the user's valid input
         return text
+    
+    def is_valid(self, response):
+        conditions = [len(text) == 3]
+        return all(conditions)
 
 
 class RemoveAccount(rumps.Window):
@@ -119,7 +127,11 @@ class RemoveAccount(rumps.Window):
             if response.clicked:
                 # If the user presses "Remove", parse the input
                 text = [t for t in response.text.split('\n') if t]
-                if len(text) == 1 and text[0] in self._application.accounts:
+                if text[0] == 'DEFAULT':
+                    # The name of the account must not be DEFAULT
+                    self.message = f'Invalid account name. Please try again.'
+                    continue
+                elif self.is_valid(text):
                     # If the input is valid, break the loop
                     break
                 else:
@@ -131,3 +143,7 @@ class RemoveAccount(rumps.Window):
                 return
         # Return the user's valid input
         return text
+    
+    def is_valid(self, text):
+        conditions = [len(text) == 1, text[0] in self._application.accounts]
+        return all(conditions)

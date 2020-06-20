@@ -39,7 +39,7 @@ class Application(rumps.App):
             Returns a list of account names.
     '''
 
-    @update_menu
+    # @update_menu
     def __init__(self, *args, **kwargs):
         '''Please see help(Applicatioon) for more info.'''
 
@@ -53,6 +53,14 @@ class Application(rumps.App):
         # Initialize the configuration file and menu
         self.config = config.Configuration(self, 'config.ini')
         self.initialize_menu()
+
+        # Initialize the invasion tracker
+        self._interval = 15
+        self._invasion_timer = rumps.Timer(self._get_invasions, self._interval)
+        self._tracker = tooner.InvasionTracker()
+        self._invasions = {}
+        if self._track_option.state:
+            self._invasion_timer.start()
 
     def __getitem__(self, item):
         '''Returns path to an item in the Application Support folder.
@@ -73,6 +81,7 @@ class Application(rumps.App):
 
         return self.config.accounts
 
+    @update_menu
     def initialize_menu(self):
         '''Initializes/creates the menu items.
 
@@ -107,6 +116,12 @@ class Application(rumps.App):
         )
         preferences.add(self._remove_account_option)
         preferences.add(None)
+        self._track_option = rumps.MenuItem(
+            'Invasion Notifications',
+            callback=self._toggle_invasion_notifications,
+        )
+        preferences.add(self._track_option)
+        preferences.add(None)
         self._login_option = rumps.MenuItem(
             'Run at Login',
             callback=self.run_at_login,
@@ -122,6 +137,9 @@ class Application(rumps.App):
         conditions. Other items need their checked/unchecked state to 
         be programmatically determined.
         '''
+
+        # Determine if the "Track Invasions" preference should be checked
+        self._update_track_option()
         
         # Determine if the "Run at Login" preference should be checked
         self._update_login_option()
@@ -155,9 +173,7 @@ class Application(rumps.App):
         # Make sure that the "Run at Login" menu item is properly updated
         self._update_login_option()
         # Exit if the "Run at Login" menu item wasn't updated properly
-        if sender.state == -1:
-            return
-        if original_state != sender.state:
+        if sender.state == -1 or original_state != sender.state:
             return
         # Check the menu item if unchecked and vice versa
         sender.state = int(not sender.state)
@@ -267,6 +283,18 @@ class Application(rumps.App):
         
         item.set_callback(callback if len(self.accounts) else None)
 
+    def _update_track_option(self):
+        '''
+
+        '''
+
+        track_invasions = self._track_option
+        if track_invasions.state == -1:
+            return
+        track_invasions.state = int(self.config.get_setting('invasions'))
+        if track_invasions.state == -1:
+            track_invasions.set_callback(None)
+
     def _update_login_option(self):
         '''Toggles the "Run at Login" preference appropriately.
 
@@ -304,6 +332,52 @@ class Application(rumps.App):
             PROJECT_DIRECTORY = pathlib.Path(__file__).resolve().parent.parent
             DATA_FOLDER = os.path.join(PROJECT_DIRECTORY, 'assets')
             self.icon = os.path.join(DATA_FOLDER, filename)
+
+    def _get_invasions(self, sender):
+        '''Notifies the user of new invasions.
+
+        Communicates with the Toontown Rewritten API to get information 
+        about current invasions, then determines which invasions are 
+        new. If there are new invasions, the user will be notified via 
+        notification.
+
+        Args:
+            sender (rumps.MenuItem):
+                Automatically sent when a menu item is invoked.
+        '''
+
+        #
+        previous = self._invasions
+        current = self._tracker.get_invasions()
+
+        #
+        difference = set(current.items()) - set(previous.items())
+        #
+        for invasion in difference:
+            #
+            district, cog = invasion
+            rumps.notification(
+                title='A cog invasion has begun!',
+                subtitle=None,
+                message=f'{cog}s have invaded {district}!',
+                # icon='',
+            )
+        
+        self._invasions = current
+
+    def _toggle_invasion_notifications(self, sender):
+        original_state = self._track_option.state
+
+        if sender.state == -1 or original_state != sender.state:
+            return
+        
+        sender.state = int(not sender.state)
+        self.config.set_setting('invasions', sender.state)
+
+        if sender.state:
+            self._invasion_timer.start()
+        else:
+            self._invasion_timer.stop()
 
 
 if __name__ == '__main__':
