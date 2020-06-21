@@ -5,7 +5,7 @@
   <br>
   <br>
 
-  <h1>A Toontown Rewritten multi-launcher for MacOS.</h1>
+  <h1>A Toontown Rewritten companion for MacOS.</h1>
 
   <br>
 
@@ -25,20 +25,22 @@
 
 A companion to *[Toontown Rewritten](https://www.toontownrewritten.com)*, **MultiTooner** allows you to store login information for an unlimited amount of accounts and start playing them from the menu bar.
 
-You are also able to add or remove stored accounts from the menu bar alone.
+You are also able to receive notifications for new invasions.
 
 ## Requirements
 
-**MultiTooner** uses the following packages:
-- **[rumps]()** to actually build the menu bar app
-- **[pyobjc-framework-LaunchServices]()** to help with login on startup functionality
+Whether you are using the frozen application or the source code, [**Toontown Rewritten**](https://www.toontownrewritten.com/play) is a requirement for launching sessions. This is because *MultiTooner* does not include any game-related files.
+
+If you are running the app via the source code, **MultiTooner** uses the following packages:
+- **[rumps](https://github.com/jaredks/rumps)** to actually build the menu bar app
+- **[pyobjc-framework-LaunchServices](https://pypi.org/project/pyobjc-framework-LaunchServices/)** to help with login on startup functionality
 - **[tooner](http://github.com/jakebrehm/tooner)**, my own package, to launch a Toontown Rewritten session
 
 However, note that this application **only supports MacOS**.
 
 ## How can I get this set up?
 
-See the latest releases of this project for a download of the standalone application.
+See the [latest release](https://github.com/jakebrehm/multitooner/releases/latest) of this project for a download of the standalone application.
 
 If you want to take the harder route, you can also clone this repository via the command
 
@@ -53,6 +55,10 @@ python script/setup.py py2app
 ```
 
 and the application will then appear in the **dist** folder.
+
+## Issues
+
+As described by the *Toontown Rewritten* team, the [Invasion API](https://github.com/ToontownRewritten/api-doc/blob/master/invasions.md) is typically not up to date. Unfortunately, there's nothing that can be done about this in *MultiTooner*.
 
 ## Authors
 - **Jake Brehm** - *Initial Work* - [Email](mailto:mail@jakebrehm.com) | [Github](http://github.com/jakebrehm) | [LinkedIn](http://linkedin.com/in/jacobbrehm)
