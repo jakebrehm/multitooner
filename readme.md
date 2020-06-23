@@ -31,12 +31,14 @@ You are also able to receive notifications for new invasions.
 
 Whether you are using the frozen application or the source code, [**Toontown Rewritten**](https://www.toontownrewritten.com/play) is a requirement for launching sessions. This is because *MultiTooner* does not include any game-related files.
 
-If you are running the app via the source code, **MultiTooner** uses the following packages:
+If you are running the app via the source code, **MultiTooner** uses the following third-party packages:
 - **[rumps](https://github.com/jaredks/rumps)** to actually build the menu bar app
 - **[pyobjc-framework-LaunchServices](https://pypi.org/project/pyobjc-framework-LaunchServices/)** to help with login on startup functionality
 - **[tooner](http://github.com/jakebrehm/tooner)**, my own package, to launch a Toontown Rewritten session
 
 However, note that this application **only supports MacOS**.
+
+Please note that, in order to launch a sessions, you must grant the application **Input Monitoring** permissions in **System Preferences > Security & Privacy**. Similarly, if you want to receive invasion notifications, you must allow the application to send you notifications.
 
 ## How can I get this set up?
 
