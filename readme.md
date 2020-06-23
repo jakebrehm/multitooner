@@ -27,7 +27,7 @@ A companion to *[Toontown Rewritten](https://www.toontownrewritten.com)*, **Mult
 
 You are also able to receive notifications for new invasions.
 
-## Requirements
+## What do I need?
 
 Whether you are using the frozen application or the source code, [**Toontown Rewritten**](https://www.toontownrewritten.com/play) is a requirement for launching sessions. This is because *MultiTooner* does not include any game-related files.
 
@@ -56,9 +56,11 @@ python script/setup.py py2app
 
 and the application will then appear in the **dist** folder.
 
-## Issues
+## Issues and future plans
 
-As described by the *Toontown Rewritten* team, the [Invasion API](https://github.com/ToontownRewritten/api-doc/blob/master/invasions.md) is typically not up to date. Unfortunately, there's nothing that can be done about this in *MultiTooner*.
+- As described by the *Toontown Rewritten* team, the [Invasion API](https://github.com/ToontownRewritten/api-doc/blob/master/invasions.md) is typically not up to date. Unfortunately, there's nothing that can be done about this in *MultiTooner*.
+- Login info for each account is stored in a plain text configuration file. This shouldn't be a problem assuming no one has access to your computer, but I'd still like to improve on it in the future.
+- Currently, the windows for adding and removing accounts are very clunky. As useful as it is, I'm limited by what *rumps* has to offer. I'd like to look into this more eventually, or find an alternative solution.
 
 ## Authors
 - **Jake Brehm** - *Initial Work* - [Email](mailto:mail@jakebrehm.com) | [Github](http://github.com/jakebrehm) | [LinkedIn](http://linkedin.com/in/jacobbrehm)
