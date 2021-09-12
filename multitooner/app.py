@@ -4,7 +4,7 @@
 multitooner.app module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The main module for the MultiTooner application. Includes all menu bar
+The menu bar module for the MultiTooner application. Includes all menu bar
 functionality.
 '''
 
@@ -15,6 +15,7 @@ import pathlib
 import rumps
 import tooner
 
+import authenticate
 import config
 import login
 import preferences
@@ -28,7 +29,7 @@ def update_menu(function):
     return wrapper
 
 
-class Application(rumps.App):
+class MenuBar(rumps.App):
     '''Main class of the MultiTooner application.
 
     Please see the documentation for rumps.App for information on 
@@ -79,6 +80,18 @@ class Application(rumps.App):
         '''Returns a list of configured account names.'''
 
         return self.config.accounts
+
+    def start(self, debug=False):
+        '''Start the application.
+        
+        Args:
+            debug (bool):
+                Whether or not to run in debug mode. Defaults to False.
+        '''
+        
+        # Set debug mode and run the application
+        rumps.debug_mode(debug)
+        self.run()
 
     @update_menu
     def initialize_menu(self):
@@ -281,7 +294,16 @@ class Application(rumps.App):
             username, password = self.config.get_account(name)
             # Launch the game
             launcher = tooner.ToontownLauncher(self._toontown)
-            launcher.play(username=username, password=password)
+            success = launcher.play(username=username, password=password)
+            if success is None:
+                window = authenticate.AuthenticationWindow(self, name)
+                response = window.get_input()
+                if response:
+                    launcher.play(
+                        username=username,
+                        password=password,
+                        appToken=response,
+                    )
         return wrapped
 
     def launch_all(self, sender):
@@ -410,9 +432,3 @@ class Application(rumps.App):
         
         # Store the current invasions for the next iteration
         self._invasions = current
-
-
-if __name__ == '__main__':
-    # Set debug mode and run the application
-    rumps.debug_mode(True)
-    Application("MultiTooner").run()

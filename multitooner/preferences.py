@@ -65,7 +65,7 @@ class AddAccount(rumps.Window):
                     # The name of the account must not be DEFAULT
                     self.message = f'Invalid account name. Please try again.'
                     continue
-                elif self.is_valid(text):
+                elif self._is_valid(text):
                     # If the input is valid, break the loop
                     break
                 else:
@@ -78,12 +78,18 @@ class AddAccount(rumps.Window):
         # Return the user's valid input
         return text
     
-    def is_valid(self, text):
-        conditions = [
+    def _is_valid(self, text):
+        '''Checks the validity of the user's input.
+        
+        Args:
+            text (str):
+                Input/text to check the validity of.
+        '''
+
+        return all([
             len(text) == 3,
             text[0] not in self._application.accounts
-        ]
-        return all(conditions)
+        ])
 
 
 class RemoveAccount(rumps.Window):
@@ -106,7 +112,8 @@ class RemoveAccount(rumps.Window):
 
         # Store parameters and initalize the base message of the window
         self._application = application
-        self._base_message = 'Enter the exact name of the account.'
+        # self._base_message = 'Enter the exact name of the account.'
+        self._base_message = "Enter the account's exact name."
 
         # Initialize and set up the class
         super().__init__(ok='Remove', cancel='Cancel', dimensions=(295, 24))
@@ -134,7 +141,7 @@ class RemoveAccount(rumps.Window):
                     # The name of the account must not be DEFAULT
                     self.message = f'Invalid account name. Please try again.'
                     continue
-                elif self.is_valid(text):
+                elif self._is_valid(text):
                     # If the input is valid, break the loop
                     break
                 else:
@@ -147,9 +154,15 @@ class RemoveAccount(rumps.Window):
         # Return the user's valid input
         return text
     
-    def is_valid(self, text):
-        conditions = [
+    def _is_valid(self, text):
+        '''Checks the validity of the user's input.
+        
+        Args:
+            text (str):
+                Input/text to check the validity of.
+        '''
+
+        return all([
             len(text) == 1,
             text[0] in self._application.accounts,
-        ]
-        return all(conditions)
+        ])
