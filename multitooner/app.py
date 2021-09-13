@@ -392,13 +392,15 @@ class MenuBar(rumps.App):
                 The filename of the asset.
         '''
 
-        # When frozen, the icon will be in the same directory
-        path = os.path.join(pathlib.Path(__file__).parent, filename)
-        if not os.path.exists(path):
+        # When frozen, the icon will be located in the app's resources directory
+        resource_path = os.environ.get('RESOURCEPATH')
+        if not resource_path:
             # During development, use the icon in the data directory
             PROJECT_DIRECTORY = pathlib.Path(__file__).resolve().parent.parent
             ASSETS_FOLDER = os.path.join(PROJECT_DIRECTORY, 'assets')
             path = os.path.join(ASSETS_FOLDER, filename)
+        else:
+            path = os.path.join(pathlib.Path(resource_path), filename)
         # Return the filepath
         return path
 

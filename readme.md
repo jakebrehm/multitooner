@@ -38,7 +38,7 @@ If you are running the app via the source code, **MultiTooner** uses the followi
 
 However, note that this application **only supports MacOS**.
 
-Please note that, in order to launch a sessions, you must grant the application **Input Monitoring** permissions in **System Preferences > Security & Privacy**. Similarly, if you want to receive invasion notifications, you must allow the application to send you notifications.
+Please note that, in order to launch a session, you must grant the application **Input Monitoring** permissions in **System Preferences > Security & Privacy**. Similarly, if you want to receive invasion notifications, you must allow the application to send you notifications.
 
 ## How can I get this set up?
 
@@ -61,7 +61,7 @@ and the application will then appear in the **dist** folder.
 ## Issues and future plans
 
 - As described by the *Toontown Rewritten* team, the [Invasion API](https://github.com/ToontownRewritten/api-doc/blob/master/invasions.md) is typically not up to date. Unfortunately, there's nothing that can be done about this in *MultiTooner*.
-- Login info for each account is stored in a plain text configuration file. This shouldn't be a problem assuming no one has access to your computer, but I'd still like to improve on it in the future.
+- Login info for each account is stored in a plain text configuration file. This shouldn't be a problem assuming no one has access to your computer, but I'd still like to improve on it in the future by adding password encryption.
 - Currently, the windows for adding and removing accounts are very clunky. As useful as it is, I'm limited by what *rumps* has to offer. I'd like to look into this more eventually, or find an alternative solution.
 
 ## Authors
